@@ -45,8 +45,11 @@ func main() {
 		}
 		try(err)
 		user, err := adobe.ParseRecord(record)
-		try(err)
-		fmt.Printf("%s\t%s\n", user.Password, user.Hint)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err, record)
+		} else {
+			fmt.Printf("%s\t%s\n", user.Password, user.Hint)
+		}
 	}
 }
 
