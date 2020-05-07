@@ -15,9 +15,17 @@ func main() {
 	f, err := os.Open("users.tar.gz")
 	try(err)
 	defer f.Close()
-	r, err := NewTarGzReader(f)
+	r, err := NewTarGZReader(f)
 	try(err)
-	try(ScanRows(r))
+	s := NewRowScanner(r)
+	for {
+		row, err := s.Row()
+		if err == io.EOF {
+			break
+		}
+		try(err)
+		_ = row
+	}
 }
 
 // User contains Adobe account info for a user.
@@ -29,8 +37,8 @@ type User struct {
 	Hint     string
 }
 
-// NewTarGzReader constructs a reader for a users.tar.gz archive.
-func NewTarGzReader(r io.Reader) (*tar.Reader, error) {
+// NewTarGZReader constructs a reader for a users.tar.gz archive.
+func NewTarGZReader(r io.Reader) (*tar.Reader, error) {
 	gr, err := gzip.NewReader(r)
 	if err != nil {
 		return nil, err
@@ -46,63 +54,66 @@ func NewTarGzReader(r io.Reader) (*tar.Reader, error) {
 	return tr, nil
 }
 
-// ScanRows parses a credential dump into records.
-func ScanRows(r io.Reader) error {
-	s := bufio.NewScanner(r)
-	count := 0
+// RowScanner parses a credential dump into records.
+type RowScanner struct {
+	br   *bufio.Reader
+	Rows int
+	Line int
+}
+
+func NewRowScanner(r io.Reader) *RowScanner {
+	return &RowScanner{bufio.NewReader(r), 0, 0}
+}
+
+func (s *RowScanner) Row() (*User, error) {
 	var line string
-	for i := 1; s.Scan(); i++ {
-		line = s.Text()
-		if len(line) == 0 {
-			continue
+	for line == "" {
+		s.Line++
+		l, err := s.br.ReadString('\n')
+		if err != nil {
+			return nil, err
+		}
+		line = l[:len(l)-1]
+	}
+
+	if !strings.HasSuffix(line, "|--") {
+		// Exit if row count encountered
+		if strings.HasSuffix(line, " rows selected.") {
+			rows, err := strconv.Atoi(line[:len(line)-len(" rows selected.")])
+			if err != nil {
+				return nil, fmt.Errorf("users: row count parse error: %v", err)
+			}
+			if rows != s.Rows {
+				return nil, fmt.Errorf(`users: dump specifies %d rows, but %d found`, rows, s.Rows)
+			}
+			return nil, io.EOF
 		}
 
-		// Join with the next line if it is not a complete row.
+		// Join with the next line to make a complete row
+		s.Line++
+		next, err := s.br.ReadString('\n')
+		if err != nil {
+			return nil, fmt.Errorf("users: error on line %d: %v", s.Line, err)
+		}
+		line += next[:len(next)-1]
 		if !strings.HasSuffix(line, "|--") {
-			if !s.Scan() {
-				break
-			}
-			line += s.Text()
-			if !strings.HasSuffix(line, "|--") {
-				if !s.Scan() {
-					break
-				}
-				return fmt.Errorf(`users: row on line %d does not end with "|--"`, i)
-			}
-			i++
+			return nil, fmt.Errorf("users: unterminated row on line %d", s.Line)
 		}
-
-		line = line[:len(line)-3]
-		row := strings.Split(line, "-|-")
-		if len(row) < 5 {
-			return fmt.Errorf("users: row on line %d has only %d columns", i, len(row))
-		}
-		if len(row) > 5 {
-			// A user-inputted field contains the sequence "-|-". In the dump,
-			// this only occurs with the hint.
-			row[4] = strings.Join(row[4:], "-|-")
-			row = row[:5]
-		}
-		// user := User{row[0], row[1], row[2], row[3], row[4]}
-		count++
 	}
 
-	if err := s.Err(); err != nil {
-		return err
+	line = line[:len(line)-len("|--")]
+	row := strings.Split(line, "-|-")
+	if len(row) < 5 {
+		return nil, fmt.Errorf("users: only %d columns on line %d", len(row), s.Line)
 	}
-
-	if !strings.HasSuffix(line, " rows selected.") {
-		return fmt.Errorf("users: dump does not end with row count")
+	if len(row) > 5 {
+		// A user-inputted field contains the sequence "-|-". In the dump,
+		// this only occurs with the hint.
+		row[4] = strings.Join(row[4:], "-|-")
+		row = row[:5]
 	}
-	rows := line[:len(line)-len(" rows selected.")]
-	rowCount, err := strconv.Atoi(rows)
-	if err != nil {
-		return fmt.Errorf("users: row count parse error: ")
-	}
-	if rowCount != count {
-		return fmt.Errorf(`users: dump contains %d rows, but %d found`, rowCount, count)
-	}
-	return nil
+	s.Rows++
+	return &User{row[0], row[1], row[2], row[3], row[4]}, nil
 }
 
 func try(err error) {
