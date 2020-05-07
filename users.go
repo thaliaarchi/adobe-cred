@@ -4,6 +4,8 @@ import (
 	"archive/tar"
 	"bufio"
 	"compress/gzip"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -41,12 +43,14 @@ func main() {
 
 	s := NewRowScanner(r)
 	for {
-		row, err := s.Row()
+		user, err := s.Row()
 		if err == io.EOF {
 			break
 		}
 		try(err)
-		_ = row
+		b, err := base64.StdEncoding.DecodeString(user.Password)
+		try(err)
+		fmt.Printf("%s\t%s\n", hex.EncodeToString(b), strings.TrimSpace(user.Hint))
 	}
 }
 
@@ -83,10 +87,12 @@ type RowScanner struct {
 	Line int
 }
 
+// NewRowScanner constructs a RowScanner.
 func NewRowScanner(r io.Reader) *RowScanner {
 	return &RowScanner{bufio.NewReader(r), 0, 0}
 }
 
+// Row scans a single row from the dump.
 func (s *RowScanner) Row() (*User, error) {
 	var line string
 	for line == "" {
