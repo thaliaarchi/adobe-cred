@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/andrewarchi/adobe-users/adobe"
+	"github.com/andrewarchi/adobe-cred/adobe"
 )
 
 func main() {
