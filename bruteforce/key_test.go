@@ -23,14 +23,8 @@ func TestIntersperse(t *testing.T) {
 		var keya, keyb [8]byte
 		binary.BigEndian.PutUint64(keya[:], key64a)
 		binary.BigEndian.PutUint64(keyb[:], key64b)
-		da, err := des.NewCipher(keya[:])
-		if err != nil {
-			t.Error(err)
-		}
-		db, err := des.NewCipher(keyb[:])
-		if err != nil {
-			t.Error(err)
-		}
+		da, _ := des.NewCipher(keya[:])
+		db, _ := des.NewCipher(keyb[:])
 
 		var outa, outb, plaina, plainb, plain [8]byte
 		binary.BigEndian.PutUint64(plain[:], rand.Uint64())
