@@ -4,9 +4,7 @@
 
 package des
 
-import (
-	"testing"
-)
+import "testing"
 
 type DESTest struct {
 	key uint64
@@ -639,7 +637,7 @@ func TestWeakKeys(t *testing.T) {
 	for i, tt := range weakKeyTests {
 		var encrypt = func(in uint64) (out uint64) {
 			c := NewCipher(tt.key)
-			out = encryptBlock(c.subkeys[:], in)
+			out = c.EncryptBlock(in)
 			return
 		}
 
@@ -659,7 +657,7 @@ func TestSemiWeakKeyPairs(t *testing.T) {
 	for i, tt := range semiWeakKeyTests {
 		var encrypt = func(key, in uint64) (out uint64) {
 			c := NewCipher(key)
-			out = encryptBlock(c.subkeys[:], in)
+			out = c.EncryptBlock(in)
 			return
 		}
 
@@ -678,7 +676,7 @@ func TestSemiWeakKeyPairs(t *testing.T) {
 func TestDESEncryptBlock(t *testing.T) {
 	for i, tt := range encryptDESTests {
 		c := NewCipher(tt.key)
-		out := encryptBlock(c.subkeys[:], tt.in)
+		out := c.EncryptBlock(tt.in)
 
 		if out != tt.out {
 			t.Errorf("#%d: result: %x want: %x", i, out, tt.out)
@@ -689,7 +687,7 @@ func TestDESEncryptBlock(t *testing.T) {
 func TestDESDecryptBlock(t *testing.T) {
 	for i, tt := range encryptDESTests {
 		c := NewCipher(tt.key)
-		plain := decryptBlock(c.subkeys[:], tt.out)
+		plain := c.DecryptBlock(tt.out)
 
 		if plain != tt.in {
 			t.Errorf("#%d: result: %x want: %x", i, plain, tt.in)

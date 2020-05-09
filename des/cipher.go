@@ -20,11 +20,11 @@ func NewCipher(key uint64) *DESCipher {
 }
 
 func (c *DESCipher) EncryptBlock(block uint64) uint64 {
-	return encryptBlock(c.subkeys[:], block)
+	return cryptBlock(c.subkeys[:], block, false)
 }
 
 func (c *DESCipher) DecryptBlock(block uint64) uint64 {
-	return decryptBlock(c.subkeys[:], block)
+	return cryptBlock(c.subkeys[:], block, true)
 }
 
 // A TripleDESCipher is an instance of TripleDES encryption.
