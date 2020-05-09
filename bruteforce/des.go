@@ -1,19 +1,20 @@
 package main
 
 import (
-	"crypto/des"
 	"encoding/binary"
 	"flag"
 	"fmt"
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/andrewarchi/adobe-cred/des"
 )
 
-var cipher = [8]byte{0x2f, 0xca, 0x9b, 0x00, 0x3d, 0xe3, 0x97, 0x78}
-var plain = [8]byte{'p', 'a', 's', 's', 'w', 'o', 'r', 'd'}
-
 var (
+	cipher uint64 = 0x2fca9b003de39778
+	plain  uint64 = binary.BigEndian.Uint64([]byte("password"))
+
 	start uint64
 	end   uint64
 	step  uint64
@@ -74,13 +75,10 @@ func main() {
 }
 
 func desSearchRange(min, max uint64) (uint64, bool, error) {
-	var key [8]byte
-	var out [8]byte
 	for i := min; i < max; i++ {
-		k := IntersperseKey(i)
-		binary.BigEndian.PutUint64(key[:], k)
-		d, _ := des.NewCipher(key[:]) // never errs on size 8 key
-		d.Decrypt(out[:], cipher[:])
+		key := IntersperseKey(i)
+		d := des.NewCipher(key)
+		out := d.DecryptBlock(cipher)
 		if out == plain {
 			return i, true, nil
 		}
