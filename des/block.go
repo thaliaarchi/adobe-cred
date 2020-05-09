@@ -172,8 +172,7 @@ func permuteFinalBlock(block uint64) uint64 {
 
 // creates 16 28-bit blocks rotated according
 // to the rotation schedule
-func ksRotate(in uint32) (out []uint32) {
-	out = make([]uint32, 16)
+func ksRotate(in uint32) (out [16]uint32) {
 	last := in
 	for i := 0; i < 16; i++ {
 		// 28-bit circular left shift
