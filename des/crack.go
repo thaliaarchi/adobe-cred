@@ -18,13 +18,12 @@ func NewCracker(cipher, plain uint64) *Cracker {
 	return c
 }
 
-func (c *Cracker) CheckKey(key uint64) bool {
-	// apply PC1 permutation to key
-	permutedKey := permuteBlock(key, permutedChoice1[:])
-
-	// rotate halves of permuted key according to the rotation schedule
-	leftRotations := ksRotate(uint32(permutedKey >> 28))
-	rightRotations := ksRotate(uint32(permutedKey<<4) >> 4)
+// CheckKey checks whether the given permuted 56-biy key encrypts to the
+// cipher text and returns the key in the format used by des.Cipher.
+func (c *Cracker) CheckKey(key56 uint64) (key64 uint64, ok bool) {
+	// rotate halves of key according to the rotation schedule
+	leftRotations := ksRotate(uint32(key56 >> 28))
+	rightRotations := ksRotate(uint32(key56<<4) >> 4)
 
 	// generate subkeys
 	var subkeys [16]uint64
@@ -50,5 +49,11 @@ func (c *Cracker) CheckKey(key uint64) bool {
 
 	// switch left & right
 	preOutput := (uint64(right) << 32) | uint64(left)
-	return preOutput == c.cipher
+
+	if preOutput == c.cipher {
+		// apply PC1 permutation to key in reverse
+		key64 = permuteBlockInverse(key56, permutedChoice1[:])
+		return key64, true
+	}
+	return 0, false
 }

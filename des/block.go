@@ -54,6 +54,17 @@ func permuteBlock(src uint64, permutation []uint8) (block uint64) {
 	return
 }
 
+// general purpose function to perform the inverse of a DES block
+// permutation
+func permuteBlockInverse(src uint64, permutation []uint8) (block uint64) {
+	for position, n := range permutation {
+		m := uint((len(permutation) - 1) - position)
+		bit := (src >> m) & 1
+		block |= bit << n
+	}
+	return
+}
+
 func initFeistelBox() {
 	for s := range sBoxes {
 		for i := 0; i < 4; i++ {

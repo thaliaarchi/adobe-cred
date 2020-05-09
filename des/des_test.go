@@ -636,16 +636,11 @@ var tableA4Tests = []TripleDESTest{
 // Use the known weak keys to test DES implementation
 func TestWeakKeys(t *testing.T) {
 	for i, tt := range weakKeyTests {
-		var encrypt = func(in uint64) (out uint64) {
-			c := NewCipher(tt.key)
-			out = c.EncryptBlock(in)
-			return
-		}
-
 		// Encrypting twice with a DES weak
 		// key should reproduce the original input
-		result := encrypt(tt.in)
-		result = encrypt(result)
+		c := NewCipher(tt.key)
+		result := c.EncryptBlock(tt.in)
+		result = c.EncryptBlock(result)
 
 		if result != tt.in {
 			t.Errorf("#%d: result: %x want: %x", i, result, tt.in)
@@ -860,6 +855,17 @@ func TestFinalPermute(t *testing.T) {
 		want := uint64(1) << initialPermutation[63-i]
 		if got != want {
 			t.Errorf("permute(%x) = %x, want %x", bit, got, want)
+		}
+	}
+}
+
+func TestPermuteBlockInverse(t *testing.T) {
+	for i := uint(0); i < 64; i++ {
+		bit := uint64(1) << i
+		got := permuteBlockInverse(bit, initialPermutation[:])
+		want := permuteBlock(bit, finalPermutation[:])
+		if got != want {
+			t.Errorf("inverse(%x) = %x, want %x", bit, got, want)
 		}
 	}
 }
