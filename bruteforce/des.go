@@ -56,7 +56,7 @@ func main() {
 				}
 
 				if ok {
-					fmt.Printf("Found key 0x%x (0x%x) in %v\n", key, IntersperseKey(key), time.Since(t0))
+					fmt.Printf("Found key 0x%x (0x%x) in %v\n", key, des.Intersperse56(key), time.Since(t0))
 					mu.Lock()
 					done = true
 					mu.Unlock()
@@ -76,7 +76,7 @@ func main() {
 
 func desSearchRange(min, max uint64) (uint64, bool, error) {
 	for i := min; i < max; i++ {
-		key := IntersperseKey(i)
+		key := des.Intersperse56(i)
 		d := des.NewCipher(key)
 		out := d.DecryptBlock(cipher)
 		if out == plain {

@@ -8,7 +8,7 @@ import "testing"
 
 func TestCheckKey(t *testing.T) {
 	for i, tt := range encryptDESTests {
-		c := NewCracker(tt.out, tt.in)
+		c := NewCracker(tt.in, tt.out)
 		key56 := permuteBlock(tt.key, permutedChoice1[:])
 		key64, ok := c.CheckKey(key56)
 		if !ok {
@@ -25,22 +25,21 @@ func TestCheckKey(t *testing.T) {
 
 func BenchmarkCrackerSearch(b *testing.B) {
 	tt := encryptDESTests[0]
-	c := NewCracker(tt.out, tt.in)
-	b.SetBytes(BlockSize)
+	c := NewCracker(tt.in, tt.out)
+	max := permuteBlock(tt.key, permutedChoice1[:]) + 100
+	min := max - 100000
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		key, ok := c.CheckKey(uint64(i))
-		_, _ = key, ok
+		_, _ = c.SearchKey(min, max)
 	}
 }
 
 func BenchmarkEncryptSearch(b *testing.B) {
 	tt := encryptDESTests[0]
-	b.SetBytes(BlockSize)
+	max := tt.key + 100
+	min := max - 100000
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		c := NewCipher(uint64(i))
-		out := c.EncryptBlock(tt.in)
-		_ = out
+		_, _ = searchKey(tt.in, tt.out, min, max)
 	}
 }
