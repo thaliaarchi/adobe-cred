@@ -22,3 +22,25 @@ func TestCheckKey(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkCrackerSearch(b *testing.B) {
+	tt := encryptDESTests[0]
+	c := NewCracker(tt.out, tt.in)
+	b.SetBytes(BlockSize)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		key, ok := c.CheckKey(uint64(i))
+		_, _ = key, ok
+	}
+}
+
+func BenchmarkEncryptSearch(b *testing.B) {
+	tt := encryptDESTests[0]
+	b.SetBytes(BlockSize)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		c := NewCipher(uint64(i))
+		out := c.EncryptBlock(tt.in)
+		_ = out
+	}
+}
