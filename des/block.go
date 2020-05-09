@@ -1,4 +1,5 @@
 // Copyright 2011 The Go Authors. All rights reserved.
+// Copyright 2020 Andrew Archibald. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -6,31 +7,6 @@ package des
 
 func init() {
 	initFeistelBox()
-}
-
-func cryptBlock(subkeys []uint64, block uint64, decrypt bool) (dst uint64) {
-	b := permuteInitialBlock(block)
-	left, right := uint32(b>>32), uint32(b)
-
-	left = (left << 1) | (left >> 31)
-	right = (right << 1) | (right >> 31)
-
-	if decrypt {
-		for i := 0; i < 8; i++ {
-			left, right = feistel(left, right, subkeys[15-2*i], subkeys[15-(2*i+1)])
-		}
-	} else {
-		for i := 0; i < 8; i++ {
-			left, right = feistel(left, right, subkeys[2*i], subkeys[2*i+1])
-		}
-	}
-
-	left = (left << 31) | (left >> 1)
-	right = (right << 31) | (right >> 1)
-
-	// switch left & right and perform final permutation
-	preOutput := (uint64(right) << 32) | uint64(left)
-	return permuteFinalBlock(preOutput)
 }
 
 // DES Feistel function. feistelBox must be initialized via
@@ -210,7 +186,7 @@ func ksRotate(in uint32) (out []uint32) {
 }
 
 // creates 16 56-bit subkeys from the original key
-func (c *DESCipher) generateSubkeys(key uint64) {
+func (c *Cipher) generateSubkeys(key uint64) {
 	// apply PC1 permutation to key
 	permutedKey := permuteBlock(key, permutedChoice1[:])
 
