@@ -31,7 +31,7 @@ func (c *Cracker) CheckKey(permutedKey uint64) (key uint64, ok bool) {
 		// combine halves to form 56-bit input to PC2
 		pc2Input := uint64(leftRotations[i])<<28 | uint64(rightRotations[i])
 		// apply PC2 permutation to 7 byte input
-		subkeys[i] = unpack(permuteBlock(pc2Input, permutedChoice2[:]))
+		subkeys[i] = unpack(permuteChoice2(pc2Input))
 	}
 
 	// decrypt

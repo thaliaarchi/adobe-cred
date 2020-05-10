@@ -55,8 +55,11 @@ func main() {
 	var mu sync.Mutex
 
 	workers := runtime.GOMAXPROCS(-1)
+	log.SetOutput(os.Stdout)
 	log.Printf("Searching with %d workers\n", workers)
 	t0 := time.Now()
+
+	c := des.NewCracker(plain, cipher)
 
 	var wg sync.WaitGroup
 	for i := 0; i < workers; i++ {
@@ -73,38 +76,20 @@ func main() {
 				mu.Unlock()
 
 				t := time.Now()
-				key, ok, err := desSearchRange(min, max)
-				if err != nil {
-					panic(err)
-				}
-
-				if ok {
-					log.Printf("Found key 0x%x (0x%x) in %v\n", key, des.Intersperse56(key), time.Since(t0))
+				if key, ok := c.SearchKey(min, max); ok {
+					log.Printf("Found key 0x%x in %v\n", key, time.Since(t0))
 					mu.Lock()
 					done = true
 					mu.Unlock()
 					break
 				}
 				now := time.Now()
-				log.Printf("Searched 0x%x to 0x%x in %v, %v elapsed\n", min, max, now.Sub(t), now.Sub(t0))
+				d := now.Sub(t)
+				log.Printf("Searched 0x%x to 0x%x in %v, %v/op, %v elapsed\n", min, max, d, d/time.Duration(step), now.Sub(t0))
 			}
 
 			wg.Done()
 		}()
-
-		time.Sleep(1000) // space out workers
 	}
 	wg.Wait()
-}
-
-func desSearchRange(min, max uint64) (uint64, bool, error) {
-	for i := min; i < max; i++ {
-		key := des.Intersperse56(i)
-		d := des.NewCipher(key)
-		out := d.DecryptBlock(cipher)
-		if out == plain {
-			return i, true, nil
-		}
-	}
-	return 0, false, nil
 }
