@@ -66,15 +66,3 @@ func (c *Cracker) SearchKey(min, max uint64) (key uint64, ok bool) {
 	}
 	return 0, false
 }
-
-func searchKey(in, out, min, max uint64) (key uint64, ok bool) {
-	for i := min; i < max; i++ {
-		key := UnpackParity(i)
-		c := NewCipher(key)
-		out := c.EncryptBlock(in)
-		if out == out {
-			return key, true
-		}
-	}
-	return 0, false
-}
