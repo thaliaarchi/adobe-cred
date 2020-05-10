@@ -870,6 +870,17 @@ func TestPermuteChoice1(t *testing.T) {
 	}
 }
 
+func TestPermuteChoice2(t *testing.T) {
+	for i := uint(0); i < 47; i++ {
+		bit := uint64(1) << i
+		got := permuteChoice2(bit)
+		want := permuteBlock(bit, permutedChoice2[:])
+		if got != want {
+			t.Errorf("permute(%x) = %x, want %x", bit, got, want)
+		}
+	}
+}
+
 func TestPermuteBlockInverse(t *testing.T) {
 	for i := uint(0); i < 64; i++ {
 		bit := uint64(1) << i

@@ -4,3 +4,5 @@ cred
 /bruteforce/bruteforce
 *.exe
 *.prof
+*.out
+*.dot

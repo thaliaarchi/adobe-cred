@@ -243,6 +243,60 @@ func permuteChoice1(block uint64) uint64 {
 		((block>>60)&1)<<0
 }
 
+// permuteChoice2 is equivalent to the permutation defined by
+// permutedChoice2.
+func permuteChoice2(block uint64) uint64 {
+	// TODO improve this
+	return ((block>>42)&1)<<47 |
+		((block>>39)&1)<<46 |
+		((block>>45)&1)<<45 |
+		((block>>32)&1)<<44 |
+		((block>>55)&1)<<43 |
+		((block>>51)&1)<<42 |
+		((block>>53)&1)<<41 |
+		((block>>28)&1)<<40 |
+		((block>>41)&1)<<39 |
+		((block>>50)&1)<<38 |
+		((block>>35)&1)<<37 |
+		((block>>46)&1)<<36 |
+		((block>>33)&1)<<35 |
+		((block>>37)&1)<<34 |
+		((block>>44)&1)<<33 |
+		((block>>52)&1)<<32 |
+		((block>>30)&1)<<31 |
+		((block>>48)&1)<<30 |
+		((block>>40)&1)<<29 |
+		((block>>49)&1)<<28 |
+		((block>>29)&1)<<27 |
+		((block>>36)&1)<<26 |
+		((block>>43)&1)<<25 |
+		((block>>54)&1)<<24 |
+		((block>>15)&1)<<23 |
+		((block>>4)&1)<<22 |
+		((block>>25)&1)<<21 |
+		((block>>19)&1)<<20 |
+		((block>>9)&1)<<19 |
+		((block>>1)&1)<<18 |
+		((block>>26)&1)<<17 |
+		((block>>16)&1)<<16 |
+		((block>>5)&1)<<15 |
+		((block>>11)&1)<<14 |
+		((block>>23)&1)<<13 |
+		((block>>8)&1)<<12 |
+		((block>>12)&1)<<11 |
+		((block>>7)&1)<<10 |
+		((block>>17)&1)<<9 |
+		((block>>0)&1)<<8 |
+		((block>>22)&1)<<7 |
+		((block>>3)&1)<<6 |
+		((block>>10)&1)<<5 |
+		((block>>14)&1)<<4 |
+		((block>>6)&1)<<3 |
+		((block>>20)&1)<<2 |
+		((block>>27)&1)<<1 |
+		((block>>24)&1)<<0
+}
+
 // creates 16 28-bit blocks rotated according
 // to the rotation schedule
 func ksRotate(in uint32) (out [16]uint32) {
@@ -271,7 +325,7 @@ func (c *Cipher) generateSubkeys(key uint64) {
 		// combine halves to form 56-bit input to PC2
 		pc2Input := uint64(leftRotations[i])<<28 | uint64(rightRotations[i])
 		// apply PC2 permutation to 7 byte input
-		c.subkeys[i] = unpack(permuteBlock(pc2Input, permutedChoice2[:]))
+		c.subkeys[i] = unpack(permuteChoice2(pc2Input))
 	}
 }
 
