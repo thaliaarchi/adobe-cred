@@ -347,11 +347,9 @@ func unpack(x uint64) uint64 {
 	return result
 }
 
-// Intersperse56 expands a 56-bit key into 64 bits by interspersing
-// zeros at every eighth bit. Each byte has a parity bit that is
-// discarded when permuting the key. Ignoring these reduces our key
-// space to 2 ** 56 keys.
-func Intersperse56(key56 uint64) (key64 uint64) {
+// UnpackParity expands a 56-bit key into 64 bits by interspersing zeros
+// at every eighth bit.
+func UnpackParity(key56 uint64) (key64 uint64) {
 	return (key56&0x7f)<<1 |
 		(key56&(0x7f<<7))<<2 |
 		(key56&(0x7f<<14))<<3 |
@@ -362,9 +360,9 @@ func Intersperse56(key56 uint64) (key64 uint64) {
 		(key56&(0x7f<<49))<<8
 }
 
-// Collapse56 removes parity bits from a key. This is the inverse
-// operation of Intersperse56.
-func Collapse56(key64 uint64) (key56 uint64) {
+// PackParity removes parity bits from a key. This is the inverse
+// operation of UnpackParity.
+func PackParity(key64 uint64) (key56 uint64) {
 	return (key64>>1)&0x7f |
 		(key64>>2)&(0x7f<<7) |
 		(key64>>3)&(0x7f<<14) |

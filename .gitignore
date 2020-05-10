@@ -1,8 +1,11 @@
 users.tar.gz
 cred
-/adobe-cred
-/bruteforce/bruteforce
+
+/cmd/bruteforce/bruteforce
+/cmd/credread/credread
 *.exe
+
+.vscode
 *.prof
 *.out
 *.dot

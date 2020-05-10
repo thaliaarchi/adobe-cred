@@ -1,18 +1,16 @@
-package main
+package des
 
 import (
 	"math/rand"
 	"testing"
-
-	"github.com/andrewarchi/adobe-cred/des"
 )
 
-func TestIntersperse(t *testing.T) {
+func TestParityPack(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		key64a := rand.Uint64()
-		key56a := des.Collapse56(key64a)
-		key64b := des.Intersperse56(key56a)
-		key56b := des.Collapse56(key64b)
+		key56a := PackParity(key64a)
+		key64b := UnpackParity(key56a)
+		key56b := PackParity(key64b)
 		if k := key64a &^ 0x0101010101010101; k != key64b {
 			t.Errorf("key without parity bits not equal: %x and %x", k, key64b)
 		}
@@ -20,8 +18,8 @@ func TestIntersperse(t *testing.T) {
 			t.Errorf("intersperse not two-way: %x and %x", key56a, key56b)
 		}
 
-		ca := des.NewCipher(key64a)
-		cb := des.NewCipher(key64b)
+		ca := NewCipher(key64a)
+		cb := NewCipher(key64b)
 
 		plain := rand.Uint64()
 		outa := ca.EncryptBlock(plain)
