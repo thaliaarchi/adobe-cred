@@ -181,6 +181,68 @@ func permuteFinalBlock(block uint64) uint64 {
 	return block
 }
 
+// permuteChoice1 is equivalent to the permutation defined by
+// permutedChoice1.
+func permuteChoice1(block uint64) uint64 {
+	// TODO improve this
+	return ((block>>7)&1)<<55 |
+		((block>>15)&1)<<54 |
+		((block>>23)&1)<<53 |
+		((block>>31)&1)<<52 |
+		((block>>39)&1)<<51 |
+		((block>>47)&1)<<50 |
+		((block>>55)&1)<<49 |
+		((block>>63)&1)<<48 |
+		((block>>6)&1)<<47 |
+		((block>>14)&1)<<46 |
+		((block>>22)&1)<<45 |
+		((block>>30)&1)<<44 |
+		((block>>38)&1)<<43 |
+		((block>>46)&1)<<42 |
+		((block>>54)&1)<<41 |
+		((block>>62)&1)<<40 |
+		((block>>5)&1)<<39 |
+		((block>>13)&1)<<38 |
+		((block>>21)&1)<<37 |
+		((block>>29)&1)<<36 |
+		((block>>37)&1)<<35 |
+		((block>>45)&1)<<34 |
+		((block>>53)&1)<<33 |
+		((block>>61)&1)<<32 |
+		((block>>4)&1)<<31 |
+		((block>>12)&1)<<30 |
+		((block>>20)&1)<<29 |
+		((block>>28)&1)<<28 |
+		((block>>1)&1)<<27 |
+		((block>>9)&1)<<26 |
+		((block>>17)&1)<<25 |
+		((block>>25)&1)<<24 |
+		((block>>33)&1)<<23 |
+		((block>>41)&1)<<22 |
+		((block>>49)&1)<<21 |
+		((block>>57)&1)<<20 |
+		((block>>2)&1)<<19 |
+		((block>>10)&1)<<18 |
+		((block>>18)&1)<<17 |
+		((block>>26)&1)<<16 |
+		((block>>34)&1)<<15 |
+		((block>>42)&1)<<14 |
+		((block>>50)&1)<<13 |
+		((block>>58)&1)<<12 |
+		((block>>3)&1)<<11 |
+		((block>>11)&1)<<10 |
+		((block>>19)&1)<<9 |
+		((block>>27)&1)<<8 |
+		((block>>35)&1)<<7 |
+		((block>>43)&1)<<6 |
+		((block>>51)&1)<<5 |
+		((block>>59)&1)<<4 |
+		((block>>36)&1)<<3 |
+		((block>>44)&1)<<2 |
+		((block>>52)&1)<<1 |
+		((block>>60)&1)<<0
+}
+
 // creates 16 28-bit blocks rotated according
 // to the rotation schedule
 func ksRotate(in uint32) (out [16]uint32) {
@@ -198,7 +260,7 @@ func ksRotate(in uint32) (out [16]uint32) {
 // creates 16 56-bit subkeys from the original key
 func (c *Cipher) generateSubkeys(key uint64) {
 	// apply PC1 permutation to key
-	permutedKey := permuteBlock(key, permutedChoice1[:])
+	permutedKey := permuteChoice1(key)
 
 	// rotate halves of permuted key according to the rotation schedule
 	leftRotations := ksRotate(uint32(permutedKey >> 28))

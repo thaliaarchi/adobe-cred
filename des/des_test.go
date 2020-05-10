@@ -859,6 +859,17 @@ func TestFinalPermute(t *testing.T) {
 	}
 }
 
+func TestPermuteChoice1(t *testing.T) {
+	for i := uint(0); i < 56; i++ {
+		bit := uint64(1) << i
+		got := permuteChoice1(bit)
+		want := permuteBlock(bit, permutedChoice1[:])
+		if got != want {
+			t.Errorf("permute(%x) = %x, want %x", bit, got, want)
+		}
+	}
+}
+
 func TestPermuteBlockInverse(t *testing.T) {
 	for i := uint(0); i < 64; i++ {
 		bit := uint64(1) << i

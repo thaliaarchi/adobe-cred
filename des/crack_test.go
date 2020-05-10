@@ -9,7 +9,7 @@ import "testing"
 func TestCheckKey(t *testing.T) {
 	for i, tt := range encryptDESTests {
 		c := NewCracker(tt.in, tt.out)
-		key56 := permuteBlock(tt.key, permutedChoice1[:])
+		key56 := permuteChoice1(tt.key)
 		key64, ok := c.CheckKey(key56)
 		if !ok {
 			t.Errorf("#%d: key %x not ok", i, key56)
@@ -23,10 +23,10 @@ func TestCheckKey(t *testing.T) {
 	}
 }
 
-func BenchmarkCrackerSearch(b *testing.B) {
+func BenchmarkCrackerSearchKey(b *testing.B) {
 	tt := encryptDESTests[0]
 	c := NewCracker(tt.in, tt.out)
-	max := permuteBlock(tt.key, permutedChoice1[:]) + 100
+	max := permuteChoice1(tt.key) + 100
 	min := max - 100000
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -34,7 +34,7 @@ func BenchmarkCrackerSearch(b *testing.B) {
 	}
 }
 
-func BenchmarkEncryptSearch(b *testing.B) {
+func BenchmarkEncryptSearchKey(b *testing.B) {
 	tt := encryptDESTests[0]
 	max := tt.key + 100
 	min := max - 100000
