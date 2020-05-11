@@ -18,7 +18,7 @@ func NewCracker(in, out uint64) *Cracker {
 	return c
 }
 
-// CheckKey checks whether the given permuted 56-biy key encrypts to the
+// CheckKey checks whether the given permuted 56-bit key encrypts to the
 // cipher text and returns the key in the format used by des.Cipher.
 func (c *Cracker) CheckKey(permutedKey uint64) (key uint64, ok bool) {
 	// rotate halves of key according to the rotation schedule

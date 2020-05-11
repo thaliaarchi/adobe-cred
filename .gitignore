@@ -1,6 +1,7 @@
 users.tar.gz
 cred
 
+/cmd/asciisearch/asciisearch
 /cmd/bruteforce/bruteforce
 /cmd/credread/credread
 *.exe
