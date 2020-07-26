@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io"
 	"os"
@@ -37,19 +38,18 @@ func main() {
 		r = tr
 	}
 
-	s := adobe.NewUserReader(r)
+	cr := adobe.NewCredReader(r)
+	w := csv.NewWriter(os.Stdout)
 	for {
-		record, err := s.Read()
+		record, err := cr.Read()
 		if err == io.EOF {
 			break
 		}
 		try(err)
-		user, err := adobe.ParseRecord(record)
-		if err != nil {
+		if _, err := adobe.ParseRecord(record); err != nil {
 			fmt.Fprintln(os.Stderr, err, record)
-		} else {
-			fmt.Printf("%s\t%s\n", user.Password, user.Hint)
 		}
+		try(w.Write(record))
 	}
 }
 

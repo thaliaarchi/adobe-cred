@@ -9,20 +9,20 @@ import (
 	"strings"
 )
 
-// UserReader parses a credential dump into records.
-type UserReader struct {
+// CredReader parses a credential dump into records.
+type CredReader struct {
 	br     *bufio.Reader
 	record int
 	line   int
 }
 
-// NewUserReader constructs a UserReader.
-func NewUserReader(r io.Reader) *UserReader {
-	return &UserReader{bufio.NewReader(r), 0, 0}
+// NewCredReader constructs a CredReader.
+func NewCredReader(r io.Reader) *CredReader {
+	return &CredReader{bufio.NewReader(r), 0, 0}
 }
 
 // Read reads one record from r.
-func (r *UserReader) Read() ([]string, error) {
+func (r *CredReader) Read() ([]string, error) {
 	var line string
 	for line == "" {
 		r.line++
@@ -59,15 +59,9 @@ func (r *UserReader) Read() ([]string, error) {
 	}
 
 	line = line[:len(line)-len("|--")]
-	record := strings.Split(line, "-|-")
+	record := strings.SplitN(line, "-|-", 5)
 	if len(record) < 5 {
 		return nil, &ParseError{r.record, r.line, fmt.Errorf("only %d columns", len(record))}
-	}
-	if len(record) > 5 {
-		// A user-inputted field contains the sequence "-|-". In the dump,
-		// this only occurs with the hint.
-		record[4] = strings.Join(record[4:], "-|-")
-		record = record[:5]
 	}
 	r.record++
 	return record, nil

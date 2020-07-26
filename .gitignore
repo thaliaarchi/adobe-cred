@@ -1,5 +1,7 @@
 users.tar.gz
 cred
+*.out
+*.csv
 
 /cmd/asciisearch/asciisearch
 /cmd/bruteforce/bruteforce
@@ -7,6 +9,6 @@ cred
 *.exe
 
 .vscode
+
 *.prof
-*.out
 *.dot
